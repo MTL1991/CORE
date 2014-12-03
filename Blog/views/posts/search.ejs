@@ -1,0 +1,14 @@
+<h1>Buscar Posts</h1>
+
+<form method='get' action='/posts/search'>
+<div class="field">
+	<label for="search">Buscar:</label>
+	<input type="text" id="search" name="search" size='20' value='<%= search %>' />
+</div>
+
+<div class="actions">
+	<input type="submit" value="Iniciar busqueda" />
+</div>
+</form>
+
+<% include index.ejs %>
