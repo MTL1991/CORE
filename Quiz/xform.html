@@ -1,0 +1,31 @@
+<html>
+  <head>
+    <meta http-equiv="Content-type" 
+          content="text/html; charset=utf-8" >
+    <title> Formulario </title>  
+  </head> 
+  <body>
+
+    <form method=get  action="http://localhost:22000/apps/aut">
+
+      <h1>Envíe sus datos</h1>
+
+      <label for="nombre"> Nombre: </label> 
+      <input type="text" name="nombre" autofocus value="Pepe Val" ><p>
+
+      <input type="radio" name="sexo" value="hombre"> Hombre
+      <input type="radio" name="sexo" value="mujer" checked> Mujer<p>
+
+      <label  for="profesion"> Profesión: </label> 
+      <select name="profesion">
+        <option>          Medico   </option>
+        <option selected> Ingeniero</option>
+        <option>          Abogado  </option> </select><p>
+
+      <textarea name="msj" rows=2 cols=30> Mensaje </textarea><p><p>
+
+      <input type=reset value="Inicializar"><br>
+      <input type=submit value="Enviar">
+    </form> 
+  </body> 
+</html>

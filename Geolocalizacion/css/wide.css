@@ -1,0 +1,52 @@
+/* Practica 2.2, Jorge Ulloa Núñez 52008910E, Manuel Toro Legaz 50552277W */
+
+nav span { 
+    margin: 0px 10px 0px 0px;
+}
+h1{
+    text-align: center;
+}
+html, body {
+    width: inherit;
+    height: 100%;
+    background-color: #eee;
+}
+#map_canvas {
+    margin-right: 2%;
+    margin-left: 2%; 
+    margin-bottom: 2%;
+    height: 95%;
+    width: 95%;
+}
+
+#coord {  
+    margin: auto;
+    width: auto;
+}
+#texto {
+    text-align: center;
+    border: 3px solid;
+    border-radius: 20px;
+    padding: 20px;
+    overflow:auto;
+}
+
+#video{
+    margin: 0 auto; 
+    width: 400px;
+    display: block;
+}
+
+.caja {
+    width: 20%;
+}
+
+#results{
+    margin-top: 2%;
+    margin-bottom: 2%;
+    width: auto;
+    border: 3px solid;
+    border-radius: 20px;
+    padding: 10px;
+    overflow:auto;
+}

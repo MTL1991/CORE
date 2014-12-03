@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title> Formulario </title> 
+</head> 
+
+<body>
+  <h3>Modificar una pregunta o su respuesta</h3>
+
+  <form method="POST" action="/quiz/update">
+
+    <input type="hidden"  
+           name="pregu"
+           value="<%r2%>"> 
+
+    <input type="hidden"
+           name="_method"
+           value="PUT"> 
+
+
+        
+    <div>Respuesta:
+    <input type="text"  
+           name="preg"
+           value="<%r1%>"
+           size="40">
+    <p></div></div>
+    <input type="submit" value="Modificar">
+
+  </form>
+  <p> 
+  <a href="/quiz/remove">Borre o edite otra pregunta</a> |
+  <a href="/quiz/index">Realice otra pregunta</a> |
+  <a href="/quiz/new">Cree otra pregunta</a>
+</body>
+</html>

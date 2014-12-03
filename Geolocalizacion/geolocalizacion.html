@@ -1,0 +1,249 @@
+<!-- Practica 2.2, Jorge Ulloa Núñez 52008910E, Manuel Toro Legaz 50552277W -->
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Práctica 2.2 CORE</title>
+<h1>GEOLOCALIZADOR</h1>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet"  href="css/wide.css" type="text/css" />
+<link rel="stylesheet" media ="only screen and (max-device-width:720px)" href="css/smartphone.css"/>
+<link rel="stylesheet" media="screen and (min-device-width: 721px) and (max-device-width: 900px)" href="css/tablet.css"/>
+
+<script src="http://maps.google.com/maps/api/js?sensor=false&libraries=geometry"></script><!--Google Maps no carga todas sus funciones por defecto, hay que ir especificándolas si se salen de las funciones standard-->
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="geolocalizacion.js"></script>
+
+<script type="text/javascript">
+// Determine support for Geolocation
+if (navigator.geolocation) {
+    // Locate position
+    navigator.geolocation.getCurrentPosition(displayPosition, errorFunction);
+} else {
+    alert('It seems like Geolocation, which is required for this page, is not enabled in your browser. Please use a browser which supports it.');
+}
+var latlngActual,latlngAnterior;
+var map;
+
+//Comprueba que el formato sea válido, es decir, comprueba en primer lugar que haya o un + o un -
+//Tras ello busca que haya entre 1 y 3 números del 0 al 9
+//Después busca que haya un único punto
+//Finalmente busca de nuevo que haya entre 1 y 5 números del 0 al 9
+function validInput(){
+  if($('#longActual').val().match(/^([+-]?)(\d{1,3})(\u002E{1}(\d{1,5}))?$/) === null){
+    return false;
+  }
+    if($('#latAnterior').val().match(/^([+-]?)(\d{1,3})(\u002E{1}(\d{1,5}))?$/) === null){
+    return false;
+  }
+    if($('#longAnterior').val().match(/^([+-]?)(\d{1,3})(\u002E{1}(\d{1,5}))?$/) === null){
+    return false;
+  }
+    if($('#latActual').val().match(/^([+-]?)(\d{1,3})(\u002E{1}(\d{1,5}))?$/) === null){
+    return false;
+  }
+  return true;
+}
+
+//Función de inicio, capta los valores de los cajetines de las coordenadas y si no están en blanco, llama
+//al método que los procesa
+function ini(){
+  $(document).ready(function(){
+    $('#longActual').keyup(function(event){
+      if(event.keyCode == 13){
+        if( ($('#longActual').val()!='') && ($('#latActual').val()!='') && ($('#longAnterior').val()!='') && ($('#latAnterior').val()!='')){
+          clickModificar();
+        }
+      }
+    });
+  });
+}
+
+//Función para sacar un número de una string simplificando más adelante el código
+function parse(str,pre){
+  return parseFloat(str).toFixed(pre);
+}
+//Obtenemos de los cajetines los valores de las coordenadas y cargamos el mapa
+function clickModificar(){
+  if(validInput()){
+    localStorage.longActual= $('#longActual').val();
+    localStorage.latActual= $('#latActual').val();
+    localStorage.longAnterior= $('#longAnterior').val();
+    localStorage.latAnterior= $('#latAnterior').val();
+    loadMap();
+  }else{
+    alert('Introduzca un valor válido para las coordenadas.');
+  }
+}
+
+//Inicializamos a la coordenada inicial ya que no existirá una medición anterior 
+//Si entra en el else es porque ya ha habido una localización anterior y ponemos
+//como coordenadas anteriores las del punto anterior a esta nueva localización         
+function latlngIni(pos){
+  if(localStorage.getItem('latAnterior')===null){
+    localStorage.latAnterior = pos.coords.latitude;
+  }else{ 
+    localStorage.latAnterior = localStorage.latActual; 
+  }
+  if(localStorage.getItem('longAnterior')===null){
+    localStorage.longAnterior = pos.coords.longitude;
+  }else{
+    localStorage.longAnterior = localStorage.longActual;
+  }
+
+    localStorage.latActual = pos.coords.latitude;
+    localStorage.longActual = pos.coords.longitude;
+}
+
+//Calculamos la distancia con el comando propio de la API de Google Maps
+//En caso de ser mayor que un kilómetro operamos con ella para expresarla en esa unidad
+function calculateDistance()
+{
+  var distancia = google.maps.geometry.spherical.computeDistanceBetween (latlngActual, latlngAnterior);
+  
+
+   if(distancia>=1000){
+  distancia = (distancia/1000).toFixed(3);
+     $('#results').html ('<p>Distancia: ' + distancia +' kilometros.</p>');
+   }else{
+     distancia= distancia.toFixed(0);
+    $('#results').html ('<p>Distancia: ' + distancia +' metros.</p>');
+   }
+}
+
+//Carga las coordenadas y lo representa en el mapa. Al pasarlo por el parse, lo dejamos en 5 decimales como mucho
+function loadMap(){
+  
+    $('#latAnterior').val(parse(localStorage.latAnterior,5));
+    $('#longAnterior').val(parse(localStorage.longAnterior,5));
+    $('#latActual').val(parse(localStorage.latActual,5));
+    $('#longActual').val(parse(localStorage.longActual,5));
+    var  value = (parseFloat(localStorage.latAnterior)+parseFloat(localStorage.latActual))/2;
+    var  value1 = (parseFloat(localStorage.longAnterior)+parseFloat(localStorage.longActual))/2;
+    
+    latlngMedia = new google.maps.LatLng(value, value1);
+    
+    latlngActual = new google.maps.LatLng(localStorage.latActual, localStorage.longActual);
+    latlngAnterior = new google.maps.LatLng(localStorage.latAnterior, localStorage.longAnterior);
+    var distancia = google.maps.geometry.spherical.computeDistanceBetween (latlngActual, latlngAnterior);
+    var zoom1;
+    var distanciaKM=distancia/1000;
+
+    zoom1= 15;
+    if(distanciaKM>2.2){
+        zoom1 = 14;
+      }
+    if(distanciaKM>3.9){
+        zoom1 = 13;
+      }
+    if(distanciaKM>7.8){
+        zoom1 = 12;
+      }
+    if(distanciaKM>15.6){
+        zoom1 = 11;
+      }
+    if(distanciaKM>32.3){
+        zoom1 = 10;
+      }
+    if(distanciaKM>65){
+        zoom1 = 9;
+      }
+    if(distanciaKM>132){
+        zoom1 = 8;
+      }
+    if(distanciaKM>266){
+        zoom1 = 7;
+      }
+     if(distanciaKM>544){
+        zoom1 = 6;
+      } 
+      if(distanciaKM>1100){
+        zoom1 = 5;
+      }
+      if(distanciaKM>2269){
+        zoom1 = 4;
+      }
+      if(distanciaKM>5000){
+        zoom1 = 3;
+      }
+      if(distanciaKM>10000){
+        zoom1 = 2;
+      }
+      if(distanciaKM>16000){
+        zoom1 = 1;
+      }
+
+    var myOptions = {
+        zoom: zoom1,
+        center: latlngMedia,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+
+//A continuación colocamos los 2 marcadores, el de la posición actual y el de la anterior.
+
+   map = new google.maps.Map($('#map_canvas')[0], myOptions);
+   
+
+    google.maps.event.trigger(map, 'resize'); 
+    //Add marker
+    markerActual = new google.maps.Marker({
+        position: latlngActual, 
+        map: map, 
+        title:"Usted esta aquí",
+    });
+
+    
+    markerAnterior = new google.maps.Marker({
+        position: latlngAnterior, 
+        map: map, 
+        title:"Usted estuvo aquí",
+    });
+
+    calculateDistance();
+}
+
+// Success callback function
+function displayPosition(pos) {
+  latlngIni(pos);
+  loadMap();  
+}
+
+// Error callback function
+function errorFunction(pos) {
+    alert('Error!');
+}
+</script>
+</head>
+
+<body>
+  <div id="texto">Esta es una pagina creada por Jorge Ulloa y Manuel Toro. En ella se podrá determinar la localización actual mediante el reconocimiento de la dirección IP y mostrandolo en la aplicación de Google Maps. Además de podrán modificar los valores de las coordenadas para representar unos puntos diferentes en el mapa.</div>
+  <p> <video id="video" controls>
+  <source src="videos/movie.mp4" type="video/mp4">
+  <source src="videos/movie.ogv" type="video/ogg">
+  Your browser does not support the video tag.
+    </video> </p>
+    <div id="map_canvas"></div>
+    <div id="locationinfo"></div>
+<form id="coord" action="JavaScript:clickModificar()">
+        <div>
+            Longitud actual: <input class="caja" type="text" id="longActual" maxlength="8" size="2" required/>
+        </div>
+        <div>
+            Latitud actual: <input class="caja" type="text" id="latActual" maxlength="8" size="2" required/>
+        </div>
+        <div>
+            Longitud anterior: <input class="caja" type="text" id="longAnterior" maxlength="8" size="2" required/>
+        </div>
+        <div>
+            Latitud anterior: <input class= "caja" type="text" id="latAnterior" maxlength="8" size="2" required/>
+        </div>
+        <div><input type="submit" value="Modificar" autofocus></input></div>
+        <div id="results">
+            <p>Si aparece este mensaje o no se ha calculado la distancia o hay algun error.</p>
+        </div>
+    </form>
+    
+</body>
+</html>
+
